@@ -47,7 +47,6 @@ app-example
 
 # testing
 /coverage
-/__mocks__
 
 # env
 .env.*
