@@ -3,4 +3,5 @@ export type Photo = {
   url: string
   width: number
   height: number
+  mimeType?: string
 }

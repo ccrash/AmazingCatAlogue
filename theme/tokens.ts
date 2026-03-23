@@ -26,7 +26,7 @@ export const makeTheme = (scheme: 'light' | 'dark'): AppTheme => {
       primary: '#FF0000',
       border: isDark ? '#2a2a2a' : '#e5e7eb',
       muted: isDark ? '#9ca3af' : '#6b7280',
-      white: '#ffffff '
+      white: '#ffffff'
     },
     radius: 12,
     spacing: n => n * 4

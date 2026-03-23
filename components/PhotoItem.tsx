@@ -1,11 +1,10 @@
-import React, { useState, useMemo, useCallback, memo } from 'react'
+import { useState, useMemo, useCallback, memo } from 'react'
 import { ActivityIndicator, Image, Text, View, Pressable, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import type { Photo } from '@/types/photo'
 import { calcImageHeight } from '@utils/image'
-import { useStoreDispatch, useStoreSelector } from '@hooks/store'
-import { selectIsLiked, toggleLikeAndCache } from '@store/photosSlice'
-import { selectVoteInfo, castVoteThunk } from '@store/votesSlice'
+import { usePhotosStore, selectIsLiked } from '@store/usePhotosStore'
+import { useVotesStore, DEFAULT_VOTE_INFO } from '@store/useVotesStore'
 import { useTheme } from '@theme/ThemeProvider'
 import Heart from '@assets/heart_fill.svg'
 
@@ -13,93 +12,101 @@ type Props = {
   photo: Photo
 }
 
-export const PhotoItem = ({ photo }: Props) => {
-  const [loaded, setLoaded] = useState(false)
+const PhotoItem = ({ photo }: Props) => {
   const [isVoting, setIsVoting] = useState(false)
+  const [imageLoaded, setImageLoaded] = useState(false)
   const height = useMemo(() => calcImageHeight(photo.width, photo.height), [photo.width, photo.height])
 
-  const dispatch = useStoreDispatch()
-  const isLiked = useStoreSelector((s: any) => selectIsLiked(photo.id)(s))
-  const { score, userVote } = useStoreSelector((s: any) => selectVoteInfo(photo.id)(s))
+  const isLiked = usePhotosStore(selectIsLiked(photo.id))
+  const toggleLike = usePhotosStore(s => s.toggleLike)
+  const { score, userVote } = useVotesStore(s => s.byImageId[photo.id] ?? DEFAULT_VOTE_INFO)
+  const castVote = useVotesStore(s => s.castVote)
 
   const theme = useTheme()
   const styles = useMemo(() => makeStyles(theme), [theme])
 
   const onToggleLike = useCallback(() => {
-    dispatch(toggleLikeAndCache(photo.id))
-  }, [dispatch, photo.id])
+    toggleLike(photo.id)
+  }, [toggleLike, photo.id])
 
   const onVote = useCallback(async (value: 1 | 0) => {
-    if (isVoting || userVote === value) return
+    if (isVoting) return
     setIsVoting(true)
-    await dispatch(castVoteThunk({ imageId: photo.id, value }))
+    await castVote(photo.id, value)
     setIsVoting(false)
-  }, [dispatch, photo.id, isVoting, userVote])
+  }, [castVote, photo.id, isVoting])
 
   return (
     <View style={styles.card}>
       {/* Image */}
       <View style={[styles.imageWrap, { height }]}>
-        {!loaded && <ActivityIndicator accessibilityLabel="Loading image" color={theme.colors.primary} />}
+        {!imageLoaded && (
+          <ActivityIndicator accessibilityLabel="Loading image" color={theme.colors.primary} />
+        )}
         <Image
           source={{ uri: photo.url }}
           style={[styles.image, { height }]}
           resizeMode="cover"
-          onLoadEnd={() => setLoaded(true)}
+          onLoadEnd={() => setImageLoaded(true)}
           accessible
           accessibilityLabel="Cat photo"
         />
-        <Pressable
-          onPress={onToggleLike}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityState={{ selected: isLiked }}
-          accessibilityLabel={`${isLiked ? 'Unlike' : 'Like'} cat photo`}
-          android_ripple={{ borderless: true, color: 'rgba(255,255,255,0.25)' }}
-          style={styles.likeBtn}
-        >
-          <Heart
-            testID='heart'
-            width={32}
-            height={32}
-            fill={isLiked ? theme.colors.primary : '#ffffff'}
-          />
-        </Pressable>
       </View>
+      <View style={styles.interactionBar}>
+        {/* Vote bar */}
+        <View style={styles.voteBar}>
+          <Pressable
+            onPress={() => onVote(1)}
+            disabled={isVoting}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel="Vote up"
+            style={[styles.voteBtn, userVote === 1 && styles.voteBtnActiveUp]}
+          >
+            <Ionicons
+              name={userVote === 1 ? 'arrow-up' : 'arrow-up-outline'}
+              size={22}
+              color={theme.scheme === 'dark' ? '#1f1f1f' : '#eee'}
+            />
+          </Pressable>
 
-      {/* Vote bar */}
-      <View style={styles.voteBar}>
-        <Pressable
-          onPress={() => onVote(1)}
-          disabled={isVoting || userVote === 1}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel="Vote up"
-          style={[styles.voteBtn, userVote === 1 && styles.voteBtnActive]}
-        >
-          <Ionicons
-            name={userVote === 1 ? 'arrow-up' : 'arrow-up-outline'}
-            size={22}
-            color={userVote === 1 ? theme.colors.primary : theme.colors.muted}
-          />
-        </Pressable>
+          <Text style={styles.score}>{score}</Text>
 
-        <Text style={[styles.score, { color: theme.colors.text }]}>{score}</Text>
+          <Pressable
+            onPress={() => onVote(0)}
+            disabled={isVoting}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel="Vote down"
+            style={[styles.voteBtn, userVote === 0 && styles.voteBtnActiveDown]}
+          >
+            <Ionicons
+              name={userVote === 0 ? 'arrow-down' : 'arrow-down-outline'}
+              size={22}
+              color={theme.scheme === 'dark' ? '#1f1f1f' : '#eee'}
+            />
+          </Pressable>
+        </View>
 
-        <Pressable
-          onPress={() => onVote(0)}
-          disabled={isVoting || userVote === 0}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel="Vote down"
-          style={[styles.voteBtn, userVote === 0 && styles.voteBtnActive]}
-        >
-          <Ionicons
-            name={userVote === 0 ? 'arrow-down' : 'arrow-down-outline'}
-            size={22}
-            color={userVote === 0 ? theme.colors.primary : theme.colors.muted}
-          />
-        </Pressable>
+        {/* Like button */}
+        <View style={styles.voteBar}>
+          <Pressable
+            onPress={onToggleLike}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityState={{ selected: isLiked }}
+            accessibilityLabel={`${isLiked ? 'Unlike' : 'Like'} cat photo`}
+            android_ripple={{ borderless: true, color: 'rgba(255,255,255,0.25)' }}
+            style={styles.likeBtn}
+          >
+            <Heart
+              testID='heart'
+              width={32}
+              height={32}
+              fill={isLiked ? theme.colors.primary : '#ffffff'}
+            />
+          </Pressable>
+        </View>
       </View>
     </View>
   )
@@ -108,15 +115,23 @@ export const PhotoItem = ({ photo }: Props) => {
 const makeStyles = (t: { scheme: 'light' | 'dark'; colors: any; spacing: (n: number) => number }) =>
   StyleSheet.create({
     card: {
-      backgroundColor: t.colors.card,
+      padding: t.spacing(3),
+      backgroundColor: t.scheme === 'dark' ? '#eee' : '#1f1f1f',
       width: '100%',
+      marginBottom: t.spacing(3),
+      borderRadius: 8,
+      shadowColor: '#000',
+      shadowOpacity: 0.1,
+      shadowOffset: { width: 0, height: 2 },
+      shadowRadius: 4,
+      elevation: 2,
     },
     imageWrap: {
       width: '100%',
-      backgroundColor: t.scheme === 'dark' ? '#1f1f1f' : '#eee',
+      backgroundColor: t.scheme === 'dark' ? '#eee' : '#1f1f1f',
       justifyContent: 'center',
       alignItems: 'center',
-      padding: 4,
+      borderRadius: 6,
     },
     image: {
       position: 'absolute',
@@ -124,27 +139,28 @@ const makeStyles = (t: { scheme: 'light' | 'dark'; colors: any; spacing: (n: num
       borderRadius: 6,
     },
     likeBtn: {
-      position: 'absolute',
-      right: 12,
-      bottom: 12,
-      width: 44,
-      height: 44,
-      borderRadius: 22,
-      alignItems: 'center',
-      justifyContent: 'center',
       backgroundColor: t.scheme === 'dark' ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.55)',
       shadowColor: '#000',
       shadowOpacity: 0.2,
       shadowOffset: { width: 0, height: 2 },
       shadowRadius: 4,
       elevation: 3,
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    interactionBar: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingTop: t.spacing(3),
     },
     voteBar: {
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'center',
-      paddingVertical: t.spacing(3),
-      gap: t.spacing(4),
+      justifyContent: 'flex-start',
     },
     voteBtn: {
       width: 40,
@@ -153,7 +169,10 @@ const makeStyles = (t: { scheme: 'light' | 'dark'; colors: any; spacing: (n: num
       alignItems: 'center',
       justifyContent: 'center',
     },
-    voteBtnActive: {
+    voteBtnActiveUp: {
+      backgroundColor: t.scheme === 'dark' ? 'rgba(0,255,0,0.15)' : 'rgba(0,255,0,0.08)',
+    },
+    voteBtnActiveDown: {
       backgroundColor: t.scheme === 'dark' ? 'rgba(255,0,0,0.15)' : 'rgba(255,0,0,0.08)',
     },
     score: {
@@ -161,7 +180,10 @@ const makeStyles = (t: { scheme: 'light' | 'dark'; colors: any; spacing: (n: num
       fontWeight: '600',
       minWidth: 32,
       textAlign: 'center',
+      color: t.scheme === 'dark' ? '#1f1f1f' : '#eeeeee',
     },
   })
 
-export default memo(PhotoItem)
+const MemoPhotoItem = memo(PhotoItem)
+export { MemoPhotoItem as PhotoItem }
+export default MemoPhotoItem

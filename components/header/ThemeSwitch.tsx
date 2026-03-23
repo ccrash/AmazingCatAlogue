@@ -1,20 +1,19 @@
 import React, { useMemo, useCallback } from 'react'
 import { View, Switch, StyleSheet } from 'react-native'
-import { useStoreDispatch, useStoreSelector } from '@hooks/store'
-import { selectEffectiveScheme, setMode } from '@store/themeSlice'
+import { useThemeStore, getEffectiveScheme } from '@store/useThemeStore'
 import { useTheme } from '@theme/ThemeProvider'
 
 export default function HeaderThemeSwitch() {
-  const dispatch = useStoreDispatch()
-  const scheme = useStoreSelector(selectEffectiveScheme)
+  const scheme = useThemeStore(getEffectiveScheme)
+  const setMode = useThemeStore(s => s.setMode)
   const isDark = scheme === 'dark'
   const theme = useTheme()
   const styles = useMemo(() => makeStyles(), [])
 
   const onToggle = useCallback(() => {
     // simple toggle between light/dark (ignores 'system' for the header control)
-    dispatch(setMode(isDark ? 'light' : 'dark'))
-  }, [dispatch, isDark])
+    setMode(isDark ? 'light' : 'dark')
+  }, [setMode, isDark])
 
   return (
     <View style={styles.right}>

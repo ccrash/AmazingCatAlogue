@@ -1,18 +1,28 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useVotesStore } from '@store/useVotesStore';
+import { usePhotosStore } from '@store/usePhotosStore';
 
-import { HapticTab } from '@/components/haptic-tab';
+import { HapticTab } from '@components/haptic-tab';
 import { useTheme } from '@theme/ThemeProvider';
-import HeaderLogo from '@components/header/Logo';
-import HeaderTitle from '@components/header/Title';
-import HeaderThemeSwitch from '@components/header/ThemeSwitch';
+import HeaderLogo from '@components/header/logo';
+import HeaderTitle from '@components/header/title';
+import HeaderThemeSwitch from '@components/header/themeSwitch';
 
 import Images from '@assets/images.svg'
 import Heart from '@assets/heart_fill.svg'
-import Plus from '@assets/plus.svg'
+import Plus from '@assets/plus-circle.svg'
+import Search from '@assets/search.svg'
 
 export default function TabLayout() {
   const theme = useTheme();
+  const loadVotes = useVotesStore(s => s.loadVotes)
+  const loadFavourites = usePhotosStore(s => s.loadFavourites)
+
+  useEffect(() => {
+    loadVotes()
+    loadFavourites()
+  }, [])
 
   return (
     <Tabs
@@ -21,7 +31,7 @@ export default function TabLayout() {
         tabBarInactiveTintColor: theme.colors.muted,
         tabBarStyle: { backgroundColor: theme.colors.card, borderTopColor: theme.colors.border },
         tabBarButton: HapticTab,
-        headerStyle: { backgroundColor: theme.colors.card, justifyContent: 'flex-start' },
+        headerStyle: { backgroundColor: theme.colors.card },
         headerLeft: () => <HeaderLogo />,
         headerTitle: () => <HeaderTitle />,
         headerRight: () => <HeaderThemeSwitch />,
@@ -41,10 +51,17 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="likedPhotos"
+        name="favorite"
         options={{
           title: 'Favorites',
           tabBarIcon: ({ color }) => <Heart width={24} height={24} fill={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="search"
+        options={{
+          title: 'Search',
+          tabBarIcon: ({ color }) => <Search width={24} height={24} fill={color} />,
         }}
       />
     </Tabs>

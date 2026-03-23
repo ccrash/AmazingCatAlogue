@@ -1,51 +1,57 @@
-import React, { useEffect, useCallback, useMemo } from 'react'
+import { useEffect, useCallback, useMemo, useState } from 'react'
 import { ActivityIndicator, RefreshControl, Text, View, FlatList, StyleSheet } from 'react-native'
-import PhotoItem from '../../components/PhotoItem'
-import { useStoreDispatch, useStoreSelector } from '../../hooks/store'
-import {
-  loadNextPage,
-  resetPhotos,
-  photosSelectors,
-  selectPage,
-  selectIsLoading,
-  selectIsFetchingMore,
-  selectHasMore
-} from '../../store/photosSlice'
-import { loadVotes } from '../../store/votesSlice'
-import { useTheme } from '../../theme/ThemeProvider'
+import MemoPhotoItem from '@components/photoItem'
+import { usePhotosStore, selectAllPhotos } from '@store/usePhotosStore'
+import { useVotesStore } from '@store/useVotesStore'
+import { useTheme } from '@theme/ThemeProvider'
+import { useShallow } from 'zustand/react/shallow'
 
 const AllPhotosScreen = () => {
-  const dispatch = useStoreDispatch() as unknown as (action: any) => any
-
-  const items = useStoreSelector((state: any) => photosSelectors.selectAll(state))
-  const page = useStoreSelector((state: any) => selectPage(state))
-  const isLoading = useStoreSelector((state: any) => selectIsLoading(state))
-  const isFetchingMore = useStoreSelector((state: any) => selectIsFetchingMore(state))
-  const hasMore = useStoreSelector((state: any) => selectHasMore(state))
+  const items = usePhotosStore(useShallow(selectAllPhotos))
+  const page = usePhotosStore(s => s.page)
+  const isLoading = usePhotosStore(s => s.isLoading)
+  const isFetchingMore = usePhotosStore(s => s.isFetchingMore)
+  const hasMore = usePhotosStore(s => s.hasMore)
+  const loadNextPage = usePhotosStore(s => s.loadNextPage)
+  const reset = usePhotosStore(s => s.reset)
+  const loadFavourites = usePhotosStore(s => s.loadFavourites)
+  const loadVotes = useVotesStore(s => s.loadVotes)
 
   const theme = useTheme()
   const styles = useMemo(() => makeStyles(theme), [theme])
 
   useEffect(() => {
     if (page < 0 && !isLoading) {
-      dispatch(loadNextPage() as any)
-      dispatch(loadVotes() as any)
+      loadNextPage()
     }
-  }, [dispatch, page, isLoading])
+  }, [page, isLoading])
 
   const onEndReached = useCallback(() => {
     if (isLoading || isFetchingMore || !hasMore) return
-    dispatch(loadNextPage() as any)
-  }, [dispatch, isLoading, isFetchingMore, hasMore])
+    loadNextPage()
+  }, [isLoading, isFetchingMore, hasMore])
+
+  const [isRefreshing, setIsRefreshing] = useState(false)
+
+  useEffect(() => {
+    if (!isLoading) setIsRefreshing(false)
+  }, [isLoading])
 
   const onRefresh = useCallback(() => {
-    dispatch(resetPhotos() as any)
-    dispatch(loadNextPage() as any)
-  }, [dispatch])
+    setIsRefreshing(true)
+    reset()
+    loadNextPage()
+    loadVotes()
+    loadFavourites()
+  }, [])
 
   const renderItem = useCallback(
-    ({ item }: { item: typeof items[number] }) => <PhotoItem photo={item} />,
-    []
+    ({ item }: { item: typeof items[number] }) => (
+      <View style={styles.item}>
+        <MemoPhotoItem photo={item} />
+      </View>
+    ),
+    [styles]
   )
 
   const renderListFooterComponent = () => {
@@ -60,7 +66,7 @@ const AllPhotosScreen = () => {
   }
 
   const renderListEmptyComponent = () => {
-    if (isLoading && page < 0) {
+    if (isLoading && page < 0 && !isRefreshing) {
       return (
         <View style={styles.center}>
           <ActivityIndicator color={theme.colors.primary} />
@@ -84,11 +90,11 @@ const AllPhotosScreen = () => {
         ListFooterComponent={renderListFooterComponent}
         refreshControl={
           <RefreshControl
-            refreshing={isLoading && page < 0}
+            refreshing={isRefreshing}
             onRefresh={onRefresh}
-            tintColor={theme.colors.primary}                 // iOS spinner color
-            colors={[theme.colors.primary]}                  // Android spinner color(s)
-            progressBackgroundColor={theme.colors.card}      // Android track
+            tintColor={theme.colors.primary}
+            colors={[theme.colors.primary]}
+            progressBackgroundColor={theme.colors.card}
           />
         }
         removeClippedSubviews
@@ -105,11 +111,12 @@ const AllPhotosScreen = () => {
 
 const makeStyles = (t: { colors: any; spacing: (n: number) => number }) =>
   StyleSheet.create({
-    safe: { flex: 1, backgroundColor: t.colors.bg },
     content: { paddingBottom: 0 },
+    item: { padding: 8 },
     footer: { padding: 4 },
     center: { padding: 24, alignItems: 'center' },
     emptyText: { color: t.colors.muted }
   })
 
+export { ScreenErrorBoundary as ErrorBoundary } from '@components/screenErrorBoundary'
 export default AllPhotosScreen

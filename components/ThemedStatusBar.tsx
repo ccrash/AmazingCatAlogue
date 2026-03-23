@@ -1,11 +1,10 @@
 import React from 'react'
 import { StatusBar } from 'react-native'
-import { useStoreSelector } from '@hooks/store'
-import { selectEffectiveScheme } from '@store/themeSlice'
+import { useThemeStore, getEffectiveScheme } from '@store/useThemeStore'
 import { useTheme } from '@theme/ThemeProvider'
 
 export default function ThemedStatusBar() {
-  const scheme = useStoreSelector(selectEffectiveScheme)
+  const scheme = useThemeStore(getEffectiveScheme)
   const theme = useTheme()
 
   return (

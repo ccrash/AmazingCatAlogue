@@ -1,27 +1,24 @@
 import React, { ReactNode, useEffect, useMemo, createContext, useContext} from 'react'
 import { Appearance, type ColorSchemeName } from 'react-native'
-import { useStoreSelector, useStoreDispatch } from '@hooks/store'
-import { selectEffectiveScheme, setSystemScheme } from '@store/themeSlice'
+import { useThemeStore, getEffectiveScheme } from '@store/useThemeStore'
 import { makeTheme, makeNavTheme, type AppTheme } from './tokens'
-import type { RootState } from '@store/index'
 
 export const ThemeContext = createContext<{ theme: AppTheme }>({ theme: makeTheme('light') })
 export const useTheme = () => useContext(ThemeContext).theme
 
 export const ThemeProvider = ({ children }: { children: (navTheme: unknown) => ReactNode }) => {
-  const dispatch = useStoreDispatch()
-  // keep Redux's system scheme in sync with OS
+  const setSystemScheme = useThemeStore(s => s.setSystemScheme)
+
   useEffect(() => {
     const current = Appearance.getColorScheme() ?? 'light'
-    dispatch(setSystemScheme(current))
+    setSystemScheme(current)
     const sub = Appearance.addChangeListener((prefs: { colorScheme?: ColorSchemeName }) => {
-      const next = prefs.colorScheme ?? 'light'
-      dispatch(setSystemScheme(next))
+      setSystemScheme(prefs.colorScheme ?? 'light')
     })
     return () => sub.remove()
-  }, [dispatch])
+  }, [setSystemScheme])
 
-  const scheme = useStoreSelector((state: RootState) => selectEffectiveScheme(state))
+  const scheme = useThemeStore(getEffectiveScheme)
   const theme = useMemo(() => makeTheme(scheme), [scheme])
   const navTheme = useMemo(() => makeNavTheme(theme), [theme])
 

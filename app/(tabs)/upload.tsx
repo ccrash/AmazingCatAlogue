@@ -10,16 +10,18 @@ import {
 } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
 import { useFocusEffect, router } from 'expo-router'
-import { useStoreDispatch } from '@hooks/store'
-import { uploadAndFavourite } from '@store/photosSlice'
+import { usePhotosStore } from '@store/usePhotosStore'
 import { useTheme } from '@theme/ThemeProvider'
+import CatSilhouetteIcon from '@assets/cat_silhouette.svg'
+
+export { ScreenErrorBoundary as ErrorBoundary } from '@components/screenErrorBoundary'
 
 export default function UploadScreen() {
   const [asset, setAsset] = useState<ImagePicker.ImagePickerAsset | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const dispatch = useStoreDispatch()
+  const uploadPhoto = usePhotosStore(s => s.uploadPhoto)
   const theme = useTheme()
 
   // Reset state each time the tab is focused so it always starts fresh
@@ -32,6 +34,11 @@ export default function UploadScreen() {
   )
 
   const pickImage = useCallback(async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
+    if (status !== 'granted') {
+      setError('Photo library access is required to select an image.')
+      return
+    }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: 'images',
       allowsEditing: true,
@@ -45,16 +52,29 @@ export default function UploadScreen() {
 
   const handleUpload = useCallback(async () => {
     if (!asset) return
+
+    const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5 MB
+    if (asset.fileSize && asset.fileSize > MAX_FILE_SIZE) {
+      setError('Image must be smaller than 5 MB.')
+      return
+    }
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+    if (asset.mimeType && !allowedTypes.includes(asset.mimeType)) {
+      setError('Only JPEG, PNG, GIF and WebP images are supported.')
+      return
+    }
+
     setIsUploading(true)
     setError(null)
-    const result = await dispatch(uploadAndFavourite(asset))
-    setIsUploading(false)
-    if (uploadAndFavourite.fulfilled.match(result)) {
-      router.navigate('/(tabs)/')
-    } else {
-      setError((result.error as any)?.message ?? 'Upload failed. Please try again.')
+    try {
+      await uploadPhoto(asset)
+      router.navigate('/(tabs)')
+    } catch (e: any) {
+      setError(e?.message ?? 'Upload failed. Please try again.')
+    } finally {
+      setIsUploading(false)
     }
-  }, [asset, dispatch])
+  }, [asset, uploadPhoto])
 
   return (
     <ScrollView
@@ -78,8 +98,8 @@ export default function UploadScreen() {
           <Image source={{ uri: asset.uri }} style={styles.preview} resizeMode="cover" />
         ) : (
           <View style={styles.placeholder}>
-            <Text style={[styles.placeholderIcon, { color: theme.colors.muted }]}>🐱</Text>
-            <Text style={[styles.placeholderText, { color: theme.colors.muted }]}>
+            <CatSilhouetteIcon width={"20%"} height={"20%"} color={theme.colors.primary} />
+            <Text style={[styles.placeholderText, { color: theme.colors.text }]}>
               Tap to select a photo
             </Text>
           </View>
@@ -114,7 +134,7 @@ export default function UploadScreen() {
             <ActivityIndicator color="#fff" />
           ) : (
             <Text style={[styles.btnText, styles.btnTextPrimary]}>
-              {asset ? 'Upload & Favourite' : 'Select Photo'}
+              {asset ? 'Upload' : 'Select Photo'}
             </Text>
           )}
         </Pressable>
@@ -158,7 +178,7 @@ const styles = StyleSheet.create({
     fontSize: 48,
   },
   placeholderText: {
-    fontSize: 15,
+    fontSize: 15
   },
   errorText: {
     color: '#ef4444',

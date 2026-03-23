@@ -8,7 +8,7 @@ export default function HeaderTitle() {
 
   return (
     <View style={styles.wrap} accessibilityRole='header' accessibilityLabel='App header'>
-      <Text style={styles.text}>PhotoList</Text>
+      <Text style={styles.text}>CatAlogue</Text>
     </View>
   )
 }

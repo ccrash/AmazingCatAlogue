@@ -1,104 +1,79 @@
 import React from 'react'
 import { render, fireEvent, screen } from '@testing-library/react-native'
 
-// Mocks
-const mockDispatch = jest.fn()
-const mockUseStoreSelector = jest.fn()
-jest.mock('@hooks/store', () => ({
-  useStoreDispatch: () => mockDispatch,
-  useStoreSelector: (fn: any) => mockUseStoreSelector(fn)
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  getItem: jest.fn(() => Promise.resolve(null)),
+  setItem: jest.fn(() => Promise.resolve()),
+  removeItem: jest.fn(() => Promise.resolve()),
 }))
 
-const mockSetMode = jest.fn((mode: 'light' | 'dark') => ({
-  type: 'theme/setMode',
-  payload: mode
-}))
-jest.mock('@store/themeSlice', () => ({
-  setMode: (mode: 'light' | 'dark') => mockSetMode(mode),
-  selectEffectiveScheme: (_state: any) => 'light'
+const mockThemeState: any = {
+  mode: 'system',
+  system: 'light',
+  setMode: jest.fn(),
+  setSystemScheme: jest.fn(),
+}
+
+const mockUseThemeStore = jest.fn((selector: any) =>
+  typeof selector === 'function' ? selector(mockThemeState) : mockThemeState
+)
+
+jest.mock('@store/useThemeStore', () => ({
+  useThemeStore: (selector: any) => mockUseThemeStore(selector),
+  getEffectiveScheme: (s: any) => (s.mode === 'system' ? s.system : s.mode),
 }))
 
 jest.mock('@theme/ThemeProvider', () => ({
-  useTheme: () => ({
-    colors: { text: '#101010' }
-  })
+  useTheme: () => ({ colors: { text: '#101010' } }),
 }))
 
-import HeaderThemeSwitch from './ThemeSwitch'
+import HeaderThemeSwitch from './themeSwitch'
 
 const getThumbColor = (node: any) =>
-  node.props.thumbColor ??
-  node.props.thumbTintColor ??
-  node.props?.style?.thumbColor
-
-const getTrackColor = (node: any) =>
-  node.props.trackColor ??
-  node.props.onTintColor ??         // older iOS-style
-  node.props.tintColor ??           // older prop
-  node.props?.style?.trackColor
+  node.props.thumbColor ?? node.props.thumbTintColor ?? node.props?.style?.thumbColor
 
 beforeEach(() => {
   jest.clearAllMocks()
+  mockThemeState.mode = 'system'
+  mockThemeState.system = 'light'
+  mockThemeState.setMode = jest.fn()
+  mockUseThemeStore.mockImplementation((selector: any) =>
+    typeof selector === 'function' ? selector(mockThemeState) : mockThemeState
+  )
 })
 
 describe('HeaderThemeSwitch', () => {
   test('renders Switch reflecting dark scheme', () => {
-  mockUseStoreSelector.mockReturnValue('dark')
-
-  render(<HeaderThemeSwitch />)
-  const sw = screen.getByLabelText('Toggle dark mode')
-
-  expect(sw.props.value).toBe(true)
-  expect(getThumbColor(sw)).toBe('#101010')
-
-  const track = getTrackColor(sw)
-  if (track !== undefined) {
-    expect(track).toEqual("#6b7280")
-  }
-})
-
-test('renders Switch reflecting light scheme', () => {
-  mockUseStoreSelector.mockReturnValue('light')
-
-  render(<HeaderThemeSwitch />)
-  const sw = screen.getByLabelText('Toggle dark mode')
-
-  expect(sw.props.value).toBe(false)
-  expect(getThumbColor(sw)).toBe('#101010')
-
-  const track = getTrackColor(sw)
-  if (track !== undefined) {
-    expect(track).toEqual("#6b7280")
-  }
-})
-
-  test('toggling from dark dispatches setMode("light")', () => {
-    mockUseStoreSelector.mockReturnValue('dark')
-
+    mockThemeState.system = 'dark'
     render(<HeaderThemeSwitch />)
     const sw = screen.getByLabelText('Toggle dark mode')
-
-    fireEvent(sw, 'valueChange', false)
-
-    expect(mockSetMode).toHaveBeenCalledWith('light')
-    expect(mockDispatch).toHaveBeenCalledWith({ type: 'theme/setMode', payload: 'light' })
+    expect(sw.props.value).toBe(true)
+    expect(getThumbColor(sw)).toBe('#101010')
   })
 
-  test('toggling from light dispatches setMode("dark")', () => {
-    mockUseStoreSelector.mockReturnValue('light')
-
+  test('renders Switch reflecting light scheme', () => {
+    mockThemeState.system = 'light'
     render(<HeaderThemeSwitch />)
     const sw = screen.getByLabelText('Toggle dark mode')
+    expect(sw.props.value).toBe(false)
+    expect(getThumbColor(sw)).toBe('#101010')
+  })
 
-    fireEvent(sw, 'valueChange', true)
+  test('toggling from dark calls setMode("light")', () => {
+    mockThemeState.system = 'dark'
+    render(<HeaderThemeSwitch />)
+    fireEvent(screen.getByLabelText('Toggle dark mode'), 'valueChange', false)
+    expect(mockThemeState.setMode).toHaveBeenCalledWith('light')
+  })
 
-    expect(mockSetMode).toHaveBeenCalledWith('dark')
-    expect(mockDispatch).toHaveBeenCalledWith({ type: 'theme/setMode', payload: 'dark' })
+  test('toggling from light calls setMode("dark")', () => {
+    mockThemeState.system = 'light'
+    render(<HeaderThemeSwitch />)
+    fireEvent(screen.getByLabelText('Toggle dark mode'), 'valueChange', true)
+    expect(mockThemeState.setMode).toHaveBeenCalledWith('dark')
   })
 
   test('has the accessibility label', () => {
-    mockUseStoreSelector.mockReturnValue('light')
-
     render(<HeaderThemeSwitch />)
     expect(screen.getByLabelText('Toggle dark mode')).toBeTruthy()
   })
