@@ -8,7 +8,7 @@ jest.mock('@theme/ThemeProvider', () => ({
   }),
 }))
 
-import HeaderLogo from './logo'
+import HeaderLogo from './lLogo'
 
 describe('HeaderLogo', () => {
   it('renders with header accessibility role and label', () => {

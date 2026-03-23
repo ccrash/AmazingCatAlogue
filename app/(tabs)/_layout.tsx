@@ -5,9 +5,9 @@ import { usePhotosStore } from '@store/usePhotosStore';
 
 import { HapticTab } from '@components/haptic-tab';
 import { useTheme } from '@theme/ThemeProvider';
-import HeaderLogo from '@components/header/logo';
+import HeaderLogo from '@/components/header/lLogo';
 import HeaderTitle from '@components/header/title';
-import HeaderThemeSwitch from '@components/header/themeSwitch';
+import HeaderThemeSwitch from '@/components/header/themeSwitch';
 
 import Images from '@assets/images.svg'
 import Heart from '@assets/heart_fill.svg'
