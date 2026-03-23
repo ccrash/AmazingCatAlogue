@@ -65,7 +65,7 @@ const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     card: {
       padding: t.spacing(3),
-      backgroundColor: t.scheme === 'dark' ? '#eee' : '#1f1f1f',
+      backgroundColor: t.colors.surfaceAlt,
       width: '100%',
       marginBottom: t.spacing(3),
       borderRadius: 8,
@@ -78,7 +78,7 @@ const makeStyles = (t: AppTheme) =>
     imageWrap: {
       width: '100%',
       height: IMAGE_HEIGHT,
-      backgroundColor: t.scheme === 'dark' ? '#1f1f1f' : '#eee',
+      backgroundColor: t.colors.onSurfaceAlt,
       borderRadius: 6,
       justifyContent: 'center',
       alignItems: 'center',
@@ -91,7 +91,7 @@ const makeStyles = (t: AppTheme) =>
       borderRadius: 6,
     },
     noImage: {
-      color: t.scheme === 'dark' ? '#1f1f1f' : '#eee',
+      color: t.colors.surfaceAlt,
       fontSize: 14,
     },
     infoBar: {
@@ -101,7 +101,7 @@ const makeStyles = (t: AppTheme) =>
     name: {
       fontSize: 16,
       fontWeight: '700',
-      color: t.scheme === 'dark' ? '#1f1f1f' : '#eeeeee',
+      color: t.colors.onSurfaceAlt,
     },
     temperament: {
       fontSize: 12,
@@ -110,7 +110,7 @@ const makeStyles = (t: AppTheme) =>
     description: {
       fontSize: 14,
       lineHeight: 20,
-      color: t.scheme === 'dark' ? '#1f1f1f' : '#eeeeee',
+      color: t.colors.onSurfaceAlt,
       marginTop: t.spacing(1),
     },
     toggle: {

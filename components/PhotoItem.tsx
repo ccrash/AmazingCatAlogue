@@ -67,7 +67,7 @@ const PhotoItem = ({ photo }: Props) => {
             <Ionicons
               name={userVote === 1 ? 'arrow-up' : 'arrow-up-outline'}
               size={22}
-              color={theme.scheme === 'dark' ? '#1f1f1f' : '#eee'}
+              color={theme.colors.onSurfaceAlt}
             />
           </Pressable>
 
@@ -84,7 +84,7 @@ const PhotoItem = ({ photo }: Props) => {
             <Ionicons
               name={userVote === 0 ? 'arrow-down' : 'arrow-down-outline'}
               size={22}
-              color={theme.scheme === 'dark' ? '#1f1f1f' : '#eee'}
+              color={theme.colors.onSurfaceAlt}
             />
           </Pressable>
         </View>
@@ -117,7 +117,7 @@ const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     card: {
       padding: t.spacing(3),
-      backgroundColor: t.scheme === 'dark' ? '#eee' : '#1f1f1f',
+      backgroundColor: t.colors.surfaceAlt,
       width: '100%',
       marginBottom: t.spacing(3),
       borderRadius: 8,
@@ -129,7 +129,7 @@ const makeStyles = (t: AppTheme) =>
     },
     imageWrap: {
       width: '100%',
-      backgroundColor: t.scheme === 'dark' ? '#eee' : '#1f1f1f',
+      backgroundColor: t.colors.surfaceAlt,
       justifyContent: 'center',
       alignItems: 'center',
       borderRadius: 6,
@@ -181,7 +181,7 @@ const makeStyles = (t: AppTheme) =>
       fontWeight: '600',
       minWidth: 32,
       textAlign: 'center',
-      color: t.scheme === 'dark' ? '#1f1f1f' : '#eeeeee',
+      color: t.colors.onSurfaceAlt,
     },
   })
 

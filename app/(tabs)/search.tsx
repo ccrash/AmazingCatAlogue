@@ -129,7 +129,7 @@ export default function SearchScreen() {
 
   return (
     <View style={styles.container}>
-      <SearchBar value={query} onChangeText={setQuery} placeholder="Search breeds…" />
+      <SearchBar value={query} onChangeText={setQuery} placeholder="Search breeds..." />
 
       {(isLoading || isSearchLoading) && !isRefreshing && (
         <View style={styles.center}>

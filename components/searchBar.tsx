@@ -11,7 +11,7 @@ type Props = {
   style?: ViewStyle
 }
 
-const SearchBar = ({ value, onChangeText, placeholder = 'Search…', style }: Props) => {
+const SearchBar = ({ value, onChangeText, placeholder = 'Search...', style }: Props) => {
   const theme = useTheme()
   const styles = useMemo(() => makeStyles(theme), [theme])
 

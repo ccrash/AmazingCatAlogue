@@ -10,6 +10,10 @@ export type AppTheme = {
     border: string
     muted: string,
     white: string
+    /** Inverted surface used for photo/search cards so they stand out from the bg */
+    surfaceAlt: string
+    /** Text and icon color on top of surfaceAlt */
+    onSurfaceAlt: string
   }
   radius: number
   spacing: (n: number) => number
@@ -28,7 +32,9 @@ export const makeTheme = (scheme: 'light' | 'dark'): AppTheme => {
       primary: '#F97316',
       border: isDark ? '#2a2a2a' : '#e5e7eb',
       muted: isDark ? '#9ca3af' : '#6b7280',
-      white: '#ffffff'
+      white: '#ffffff',
+      surfaceAlt: isDark ? '#eeeeee' : '#1f1f1f',
+      onSurfaceAlt: isDark ? '#1f1f1f' : '#eeeeee',
     },
     radius: 12,
     spacing: n => n * 4

@@ -88,8 +88,9 @@ export const usePhotosStore = create<PhotosState & PhotosActions>()(
             likedIds[fav.image_id] = fav.id
           }
           set({ likedIds })
-        } catch {
-          // non-fatal — silently ignore
+        } catch (err: unknown) {
+          // non-fatal — app works without synced favourites
+          if (__DEV__) console.warn('[usePhotosStore] loadFavourites failed:', err)
         }
       },
 
@@ -137,7 +138,9 @@ export const usePhotosStore = create<PhotosState & PhotosActions>()(
             set(s => ({ likedIds: { ...s.likedIds, [id]: result.id } }))
             const photo = get().entities[id]
             if (photo) {
-              try { await Image.prefetch(photo.url) } catch {}
+              try { await Image.prefetch(photo.url) } catch (err: unknown) {
+                if (__DEV__) console.warn('[usePhotosStore] prefetch failed:', err)
+              }
             }
           } catch {
             // Rollback

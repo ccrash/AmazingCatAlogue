@@ -16,7 +16,7 @@ beforeEach(() => jest.clearAllMocks())
 describe('SearchBar', () => {
   it('renders with default placeholder', () => {
     render(<SearchBar value="" onChangeText={jest.fn()} />)
-    expect(screen.getByPlaceholderText('Search…')).toBeTruthy()
+    expect(screen.getByPlaceholderText('Search...')).toBeTruthy()
   })
 
   it('renders with a custom placeholder', () => {
@@ -52,7 +52,7 @@ describe('SearchBar', () => {
   it('calls onChangeText when text changes', () => {
     const onChangeText = jest.fn()
     render(<SearchBar value="" onChangeText={onChangeText} />)
-    fireEvent.changeText(screen.getByPlaceholderText('Search…'), 'Maine')
+    fireEvent.changeText(screen.getByPlaceholderText('Search...'), 'Maine')
     expect(onChangeText).toHaveBeenCalledWith('Maine')
   })
 })
