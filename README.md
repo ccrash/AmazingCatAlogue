@@ -17,7 +17,7 @@ A React Native / Expo mobile app that integrates with [The Cat API](https://thec
 - **Score display** — net score (upvotes − downvotes) shown between the vote buttons, loaded fresh from `/votes` on each launch.
 - **Breed search** — search and browse cat breeds with paginated results and pull-to-refresh.
 - **Light / dark theme** — follows the OS preference by default; a header toggle lets you override it. Themes are persisted across sessions.
-- **Cross-platform** — smooth, consistent UI on Android, iOS, and web.
+- **Cross-platform** — smooth, consistent UI on IOS and Android.
 
 ---
 
