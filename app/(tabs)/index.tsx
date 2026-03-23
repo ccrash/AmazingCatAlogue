@@ -1,7 +1,7 @@
 import { useEffect, useCallback, useMemo, useState } from 'react'
 import { ActivityIndicator, RefreshControl, Text, View, FlatList, StyleSheet, Pressable } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import MemoPhotoItem from '@/components/photoItem'
+import MemoPhotoItem from '@components/photoItem'
 import { usePhotosStore, selectAllPhotos } from '@store/usePhotosStore'
 import { useVotesStore } from '@store/useVotesStore'
 import { useTheme } from '@theme/ThemeProvider'
