@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback, memo } from 'react'
 import { ActivityIndicator, Image, Text, View, Pressable, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import type { Photo } from '@/types/photo'
-import { calcImageHeight } from '@utils/image'
+import { calcImageHeight, screenWidth } from '@utils/image'
 import { usePhotosStore, selectIsLiked } from '@store/usePhotosStore'
 import { useVotesStore, DEFAULT_VOTE_INFO } from '@store/useVotesStore'
 import { useTheme } from '@theme/ThemeProvider'
@@ -16,7 +16,8 @@ type Props = {
 const PhotoItem = ({ photo }: Props) => {
   const [isVoting, setIsVoting] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)
-  const height = useMemo(() => calcImageHeight(photo.width, photo.height), [photo.width, photo.height])
+  const [cardWidth, setCardWidth] = useState(screenWidth)
+  const height = useMemo(() => calcImageHeight(photo.width, photo.height, cardWidth), [photo.width, photo.height, cardWidth])
 
   const isLiked = usePhotosStore(selectIsLiked(photo.id))
   const toggleLike = usePhotosStore(s => s.toggleLike)
@@ -38,7 +39,7 @@ const PhotoItem = ({ photo }: Props) => {
   }, [castVote, photo.id, isVoting])
 
   return (
-    <View style={styles.card}>
+    <View style={styles.card} onLayout={e => setCardWidth(e.nativeEvent.layout.width)}>
       {/* Image */}
       <View style={[styles.imageWrap, { height }]}>
         {!imageLoaded && (

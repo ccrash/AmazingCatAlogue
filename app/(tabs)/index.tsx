@@ -1,5 +1,6 @@
 import { useEffect, useCallback, useMemo, useState } from 'react'
-import { ActivityIndicator, RefreshControl, Text, View, FlatList, StyleSheet } from 'react-native'
+import { ActivityIndicator, RefreshControl, Text, View, FlatList, StyleSheet, Pressable } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import MemoPhotoItem from '@components/photoItem'
 import { usePhotosStore, selectAllPhotos } from '@store/usePhotosStore'
 import { useVotesStore } from '@store/useVotesStore'
@@ -31,6 +32,8 @@ const AllPhotosScreen = () => {
     if (isLoading || isFetchingMore || !hasMore) return
     loadNextPage()
   }, [isLoading, isFetchingMore, hasMore])
+
+  const [columns, setColumns] = useState<1 | 2>(2)
 
   const [isRefreshing, setIsRefreshing] = useState(false)
 
@@ -81,11 +84,31 @@ const AllPhotosScreen = () => {
     )
   }
 
+  const listHeader = (
+    <View style={styles.topBar}>
+      <Pressable
+        onPress={() => setColumns(c => c === 1 ? 2 : 1)}
+        hitSlop={8}
+        accessibilityRole="button"
+        accessibilityLabel={columns === 1 ? 'Switch to two-column layout' : 'Switch to single-column layout'}
+      >
+        <Ionicons
+          name={columns === 1 ? 'grid-outline' : 'list-outline'}
+          size={24}
+          color={theme.colors.primary}
+        />
+      </Pressable>
+    </View>
+  )
+
   return (
       <FlatList
+        key={columns}
         data={items}
         keyExtractor={item => item.id}
         renderItem={renderItem}
+        numColumns={columns}
+        ListHeaderComponent={listHeader}
         onEndReached={onEndReached}
         onEndReachedThreshold={0.2}
         ListFooterComponent={renderListFooterComponent}
@@ -113,7 +136,8 @@ const AllPhotosScreen = () => {
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     content: { paddingBottom: 0 },
-    item: { padding: 8 },
+    topBar: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 12, paddingVertical: 8 },
+    item: { padding: 8, flex: 1 },
     footer: { padding: 4 },
     center: { padding: 24, alignItems: 'center' },
     emptyText: { color: t.colors.muted }
