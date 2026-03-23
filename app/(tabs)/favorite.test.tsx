@@ -18,7 +18,7 @@ jest.mock('@theme/ThemeProvider', () => ({
   }),
 }))
 
-jest.mock('@components/PhotoItem', () => {
+jest.mock('@components/photoItem', () => {
   const { Text } = require('react-native')
   return {
     PhotoItem: ({ photo }: any) => <Text testID={`photo-${photo.id}`}>{photo.id}</Text>,
@@ -28,8 +28,7 @@ jest.mock('@components/PhotoItem', () => {
 })
 
 import FavoriteScreen from './favorite'
-
-const makePhoto = (id: string) => ({ id, url: `https://example.com/${id}.jpg`, width: 100, height: 100 })
+import { makePhoto } from '../../__mocks__/utils'
 
 beforeEach(() => {
   jest.clearAllMocks()

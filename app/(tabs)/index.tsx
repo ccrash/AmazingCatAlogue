@@ -4,6 +4,7 @@ import MemoPhotoItem from '@components/photoItem'
 import { usePhotosStore, selectAllPhotos } from '@store/usePhotosStore'
 import { useVotesStore } from '@store/useVotesStore'
 import { useTheme } from '@theme/ThemeProvider'
+import type { AppTheme } from '@theme/tokens'
 import { useShallow } from 'zustand/react/shallow'
 
 const AllPhotosScreen = () => {
@@ -24,7 +25,7 @@ const AllPhotosScreen = () => {
     if (page < 0 && !isLoading) {
       loadNextPage()
     }
-  }, [page, isLoading])
+  }, [page, isLoading, loadNextPage])
 
   const onEndReached = useCallback(() => {
     if (isLoading || isFetchingMore || !hasMore) return
@@ -43,7 +44,7 @@ const AllPhotosScreen = () => {
     loadNextPage()
     loadVotes()
     loadFavourites()
-  }, [])
+  }, [reset, loadNextPage, loadVotes, loadFavourites])
 
   const renderItem = useCallback(
     ({ item }: { item: typeof items[number] }) => (
@@ -109,7 +110,7 @@ const AllPhotosScreen = () => {
   )
 }
 
-const makeStyles = (t: { colors: any; spacing: (n: number) => number }) =>
+const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     content: { paddingBottom: 0 },
     item: { padding: 8 },

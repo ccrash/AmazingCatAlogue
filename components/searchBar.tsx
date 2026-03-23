@@ -2,6 +2,7 @@ import { memo, useMemo } from 'react'
 import { TextInput, View, Pressable, StyleSheet, type ViewStyle } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useTheme } from '@theme/ThemeProvider'
+import type { AppTheme } from '@theme/tokens'
 
 type Props = {
   value: string
@@ -49,7 +50,7 @@ const SearchBar = ({ value, onChangeText, placeholder = 'Search…', style }: Pr
   )
 }
 
-const makeStyles = (t: { colors: any; spacing: (n: number) => number }) =>
+const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     wrap: {
       padding: t.spacing(3),

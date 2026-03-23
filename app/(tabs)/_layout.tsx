@@ -22,7 +22,7 @@ export default function TabLayout() {
   useEffect(() => {
     loadVotes()
     loadFavourites()
-  }, [])
+  }, [loadVotes, loadFavourites])
 
   return (
     <Tabs

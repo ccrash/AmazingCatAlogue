@@ -2,8 +2,8 @@ import { useState, useMemo, memo } from 'react'
 import { ActivityIndicator, Image, Text, View, Pressable, StyleSheet } from 'react-native'
 import type { Breed } from '@/types/breed'
 import { useTheme } from '@theme/ThemeProvider'
-
-const IMAGE_BASE = 'https://cdn2.thecatapi.com/images'
+import type { AppTheme } from '@theme/tokens'
+import { CDN_BASE } from '@utils/api'
 const IMAGE_HEIGHT = 220
 
 type Props = {
@@ -18,7 +18,7 @@ const SearchItem = ({ breed }: Props) => {
   const styles = useMemo(() => makeStyles(theme), [theme])
 
   const imageUri = breed.reference_image_id
-    ? `${IMAGE_BASE}/${breed.reference_image_id}.jpg`
+    ? `${CDN_BASE}/${breed.reference_image_id}.jpg`
     : null
 
   return (
@@ -61,7 +61,7 @@ const SearchItem = ({ breed }: Props) => {
   )
 }
 
-const makeStyles = (t: { scheme: 'light' | 'dark'; colors: any; spacing: (n: number) => number }) =>
+const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     card: {
       padding: t.spacing(3),

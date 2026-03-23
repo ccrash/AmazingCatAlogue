@@ -28,6 +28,7 @@ import {
   addFavourite as mockAddFavourite,
   removeFavourite as mockRemoveFavourite,
 } from '@utils/api'
+import { makePhoto } from '../__mocks__/utils'
 
 const INITIAL_STATE = {
   entities: {},
@@ -40,12 +41,6 @@ const INITIAL_STATE = {
   error: undefined,
 }
 
-const makePhoto = (id: string) => ({
-  id,
-  url: `https://example.com/${id}.jpg`,
-  width: 100,
-  height: 100,
-})
 
 beforeEach(() => {
   jest.clearAllMocks()

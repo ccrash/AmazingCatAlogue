@@ -6,6 +6,7 @@ import type { Breed } from '@/types/breed'
 export const DEFAULT_PAGE_LIMIT = 10
 
 const API_BASE = 'https://api.thecatapi.com/v1'
+export const CDN_BASE = 'https://cdn2.thecatapi.com/images'
 const API_KEY = process.env.EXPO_PUBLIC_CAT_API_KEY ?? ''
 if (__DEV__ && !API_KEY) {
   console.error('[api] EXPO_PUBLIC_CAT_API_KEY is not set. Add it to your .env.local file.')

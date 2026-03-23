@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { fetchVotes, castVote, deleteVote } from '@utils/api'
+import { fetchVotes, castVote as postVote, deleteVote } from '@utils/api'
 
 export type VoteInfo = { score: number; userVote: 1 | 0 | null; voteIds: number[] }
 
@@ -33,8 +33,8 @@ export const useVotesStore = create<VotesState & VotesActions>()((set, get) => (
         map[vote.image_id] = entry
       }
       set({ byImageId: map, isLoading: false })
-    } catch (err: any) {
-      set({ isLoading: false, error: err?.message })
+    } catch (err: unknown) {
+      set({ isLoading: false, error: (err as Error)?.message })
     }
   },
 
@@ -60,7 +60,7 @@ export const useVotesStore = create<VotesState & VotesActions>()((set, get) => (
 
     try {
       await Promise.all(prev.voteIds.map(id => deleteVote(id)))
-      const result = await castVote(imageId, value)
+      const result = await postVote(imageId, value)
       set(s => ({
         byImageId: {
           ...s.byImageId,

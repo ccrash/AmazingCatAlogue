@@ -6,6 +6,7 @@ import { calcImageHeight } from '@utils/image'
 import { usePhotosStore, selectIsLiked } from '@store/usePhotosStore'
 import { useVotesStore, DEFAULT_VOTE_INFO } from '@store/useVotesStore'
 import { useTheme } from '@theme/ThemeProvider'
+import type { AppTheme } from '@theme/tokens'
 import Heart from '@assets/heart_fill.svg'
 
 type Props = {
@@ -112,7 +113,7 @@ const PhotoItem = ({ photo }: Props) => {
   )
 }
 
-const makeStyles = (t: { scheme: 'light' | 'dark'; colors: any; spacing: (n: number) => number }) =>
+const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     card: {
       padding: t.spacing(3),

@@ -12,9 +12,13 @@ import * as ImagePicker from 'expo-image-picker'
 import { useFocusEffect, router } from 'expo-router'
 import { usePhotosStore } from '@store/usePhotosStore'
 import { useTheme } from '@theme/ThemeProvider'
+import { ERROR_COLOR } from '@theme/tokens'
 import CatSilhouetteIcon from '@assets/cat_silhouette.svg'
 
 export { ScreenErrorBoundary as ErrorBoundary } from '@components/screenErrorBoundary'
+
+const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024
+const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
 
 export default function UploadScreen() {
   const [asset, setAsset] = useState<ImagePicker.ImagePickerAsset | null>(null)
@@ -53,13 +57,11 @@ export default function UploadScreen() {
   const handleUpload = useCallback(async () => {
     if (!asset) return
 
-    const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5 MB
-    if (asset.fileSize && asset.fileSize > MAX_FILE_SIZE) {
+    if (asset.fileSize && asset.fileSize > MAX_FILE_SIZE_BYTES) {
       setError('Image must be smaller than 5 MB.')
       return
     }
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
-    if (asset.mimeType && !allowedTypes.includes(asset.mimeType)) {
+    if (asset.mimeType && !ALLOWED_MIME_TYPES.includes(asset.mimeType)) {
       setError('Only JPEG, PNG, GIF and WebP images are supported.')
       return
     }
@@ -69,8 +71,8 @@ export default function UploadScreen() {
     try {
       await uploadPhoto(asset)
       router.navigate('/(tabs)')
-    } catch (e: any) {
-      setError(e?.message ?? 'Upload failed. Please try again.')
+    } catch (e: unknown) {
+      setError((e as Error)?.message ?? 'Upload failed. Please try again.')
     } finally {
       setIsUploading(false)
     }
@@ -181,7 +183,7 @@ const styles = StyleSheet.create({
     fontSize: 15
   },
   errorText: {
-    color: '#ef4444',
+    color: ERROR_COLOR,
     fontSize: 14,
     marginBottom: 12,
     alignSelf: 'flex-start',

@@ -3,6 +3,7 @@ import { Text, View, FlatList, StyleSheet } from 'react-native'
 import MemoPhotoItem from '@components/photoItem'
 import { usePhotosStore, selectLikedPhotos } from '@store/usePhotosStore'
 import { useTheme } from '@theme/ThemeProvider'
+import type { AppTheme } from '@theme/tokens'
 import { useShallow } from 'zustand/react/shallow'
 
 const FavoriteScreen = () => {
@@ -42,7 +43,7 @@ const FavoriteScreen = () => {
   )
 }
 
-const makeStyles = (t: { colors: any; spacing: (n: number) => number }) =>
+const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     item: { padding: 8 },
     center: { padding: 24, alignItems: 'center' },

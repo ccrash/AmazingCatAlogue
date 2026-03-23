@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native'
 import { useTheme } from '@theme/ThemeProvider'
+import { ERROR_COLOR } from '@theme/tokens'
+import type { AppTheme } from '@theme/tokens'
 import { searchBreeds, fetchAllBreeds } from '@utils/api'
 import type { Breed } from '@/types/breed'
 import SearchItem from '@components/searchItem'
@@ -9,6 +11,7 @@ import SearchBar from '@components/searchBar'
 export { ScreenErrorBoundary as ErrorBoundary } from '@components/screenErrorBoundary'
 
 const PAGE_SIZE = 5
+const DEBOUNCE_MS = 400
 
 const shuffle = (arr: Breed[]): Breed[] => {
   const out = [...arr]
@@ -77,7 +80,7 @@ export default function SearchScreen() {
       } finally {
         if (seq === searchSeqRef.current) setIsSearchLoading(false)
       }
-    }, 400)
+    }, DEBOUNCE_MS)
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current)
     }
@@ -166,12 +169,12 @@ export default function SearchScreen() {
   )
 }
 
-const makeStyles = (t: { colors: any; spacing: (n: number) => number }) =>
+const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     container: { flex: 1, backgroundColor: t.colors.bg },
     list: { padding: t.spacing(3), gap: t.spacing(3) },
     footer: { paddingVertical: t.spacing(3), alignItems: 'center' },
     center: { padding: 24, alignItems: 'center' },
     muted: { color: t.colors.muted },
-    error: { color: '#ef4444', fontSize: 14 },
+    error: { color: ERROR_COLOR, fontSize: 14 },
   })

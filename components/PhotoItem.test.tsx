@@ -45,14 +45,7 @@ jest.mock('@utils/image', () => ({
 }))
 
 import PhotoItem from './photoItem'
-
-const makePhoto = (overrides: Partial<any> = {}) => ({
-  id: 'p1',
-  width: 1000,
-  height: 500,
-  url: 'https://example.com/photo.jpg',
-  ...overrides,
-})
+import { makePhoto } from '../__mocks__/utils'
 
 beforeEach(() => {
   jest.clearAllMocks()
@@ -71,7 +64,7 @@ beforeEach(() => {
 
 describe('PhotoItem', () => {
   it('shows loader before image loads and hides it after onLoadEnd', () => {
-    const photo = makePhoto()
+    const photo = makePhoto('p1')
     const { getByLabelText, queryByLabelText } = render(<PhotoItem photo={photo} />)
 
     expect(getByLabelText('Loading image')).toBeTruthy()
@@ -81,20 +74,20 @@ describe('PhotoItem', () => {
   })
 
   it('computes image height via calcImageHeight', () => {
-    const photo = makePhoto({ width: 1200, height: 800 })
+    const photo = makePhoto('p1', { width: 1200, height: 800 })
     render(<PhotoItem photo={photo} />)
     expect(mockCalcImageHeight).toHaveBeenCalledWith(1200, 800)
   })
 
   it('renders the image with the correct URI', () => {
-    const photo = makePhoto()
+    const photo = makePhoto('p1')
     const { getByLabelText } = render(<PhotoItem photo={photo} />)
     expect(getByLabelText('Cat photo').props.source.uri).toBe(photo.url)
   })
 
   it('unliked state: heart fill is white and accessible as "Like"', () => {
     mockPhotosState.likedIds = {}
-    const photo = makePhoto()
+    const photo = makePhoto('p1')
     const { getByLabelText, getByTestId } = render(<PhotoItem photo={photo} />)
     expect(getByLabelText('Like cat photo').props.accessibilityState?.selected).toBe(false)
     expect(getByTestId('heart').props.fill).toBe('#ffffff')
@@ -102,21 +95,21 @@ describe('PhotoItem', () => {
 
   it('liked state: heart fill is primary colour and accessible as "Unlike"', () => {
     mockPhotosState.likedIds = { p1: 42 }
-    const photo = makePhoto()
+    const photo = makePhoto('p1')
     const { getByLabelText, getByTestId } = render(<PhotoItem photo={photo} />)
     expect(getByLabelText('Unlike cat photo').props.accessibilityState?.selected).toBe(true)
     expect(getByTestId('heart').props.fill).toBe('tomato')
   })
 
   it('calls toggleLike when pressing the like button', () => {
-    const photo = makePhoto()
+    const photo = makePhoto('p1')
     const { getByLabelText } = render(<PhotoItem photo={photo} />)
     fireEvent.press(getByLabelText('Like cat photo'))
     expect(mockPhotosState.toggleLike).toHaveBeenCalledWith(photo.id)
   })
 
   it('renders vote up and vote down buttons', () => {
-    const photo = makePhoto()
+    const photo = makePhoto('p1')
     const { getByLabelText } = render(<PhotoItem photo={photo} />)
     expect(getByLabelText('Vote up')).toBeTruthy()
     expect(getByLabelText('Vote down')).toBeTruthy()
@@ -124,7 +117,7 @@ describe('PhotoItem', () => {
 
   it('pressing vote up calls castVote with value 1', async () => {
     mockVotesState.castVote = jest.fn().mockResolvedValue(undefined)
-    const photo = makePhoto()
+    const photo = makePhoto('p1')
     const { getByLabelText } = render(<PhotoItem photo={photo} />)
     await act(async () => { fireEvent.press(getByLabelText('Vote up')) })
     expect(mockVotesState.castVote).toHaveBeenCalledWith(photo.id, 1)
@@ -132,7 +125,7 @@ describe('PhotoItem', () => {
 
   it('pressing vote down calls castVote with value 0', async () => {
     mockVotesState.castVote = jest.fn().mockResolvedValue(undefined)
-    const photo = makePhoto()
+    const photo = makePhoto('p1')
     const { getByLabelText } = render(<PhotoItem photo={photo} />)
     await act(async () => { fireEvent.press(getByLabelText('Vote down')) })
     expect(mockVotesState.castVote).toHaveBeenCalledWith(photo.id, 0)
@@ -140,7 +133,7 @@ describe('PhotoItem', () => {
 
   it('ignores a second vote press while already voting (isVoting guard)', async () => {
     mockVotesState.castVote = jest.fn(() => new Promise(() => {})) // never resolves
-    const photo = makePhoto()
+    const photo = makePhoto('p1')
     const { UNSAFE_getByProps } = render(<PhotoItem photo={photo} />)
 
     const getVoteUp = () => UNSAFE_getByProps({ accessibilityLabel: 'Vote up' })
@@ -155,21 +148,21 @@ describe('PhotoItem', () => {
 
   it('shows active style on vote up when userVote is 1', () => {
     mockVotesState.byImageId = { p1: { score: 3, userVote: 1, voteIds: [] } }
-    const photo = makePhoto()
+    const photo = makePhoto('p1')
     const { getByText } = render(<PhotoItem photo={photo} />)
     expect(getByText('arrow-up')).toBeTruthy()
   })
 
   it('shows active style on vote down when userVote is 0', () => {
     mockVotesState.byImageId = { p1: { score: -1, userVote: 0, voteIds: [] } }
-    const photo = makePhoto()
+    const photo = makePhoto('p1')
     const { getByText } = render(<PhotoItem photo={photo} />)
     expect(getByText('arrow-down')).toBeTruthy()
   })
 
   it('displays the vote score', () => {
     mockVotesState.byImageId = { p1: { score: 7, userVote: null, voteIds: [] } }
-    const photo = makePhoto()
+    const photo = makePhoto('p1')
     const { getByText } = render(<PhotoItem photo={photo} />)
     expect(getByText('7')).toBeTruthy()
   })
@@ -181,12 +174,12 @@ describe('PhotoItem — dark scheme', () => {
   })
 
   it('renders without error in dark mode', () => {
-    const { getByLabelText } = render(<PhotoItem photo={makePhoto()} />)
+    const { getByLabelText } = render(<PhotoItem photo={makePhoto('p1')} />)
     expect(getByLabelText('Cat photo')).toBeTruthy()
   })
 
   it('uses dark-mode icon colours for vote buttons', () => {
-    const { getAllByText } = render(<PhotoItem photo={makePhoto()} />)
+    const { getAllByText } = render(<PhotoItem photo={makePhoto('p1')} />)
     expect(getAllByText('arrow-up-outline').length).toBeGreaterThan(0)
     expect(getAllByText('arrow-down-outline').length).toBeGreaterThan(0)
   })

@@ -15,6 +15,8 @@ export type AppTheme = {
   spacing: (n: number) => number
 }
 
+export const ERROR_COLOR = '#ef4444'
+
 export const makeTheme = (scheme: 'light' | 'dark'): AppTheme => {
   const isDark = scheme === 'dark'
   return {

@@ -75,8 +75,8 @@ export const usePhotosStore = create<PhotosState & PhotosActions>()(
               hasMore: batch.length >= DEFAULT_PAGE_LIMIT,
             }
           })
-        } catch (err: any) {
-          set({ isLoading: false, isFetchingMore: false, error: err?.message })
+        } catch (err: unknown) {
+          set({ isLoading: false, isFetchingMore: false, error: (err as Error)?.message })
         }
       },
 
