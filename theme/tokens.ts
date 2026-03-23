@@ -23,7 +23,7 @@ export const makeTheme = (scheme: 'light' | 'dark'): AppTheme => {
       bg: isDark ? '#0b0b0b' : '#fafafa',
       text: isDark ? '#ffffff' : '#111111',
       card: isDark ? '#161616' : '#ffffff',
-      primary: '#FF0000',
+      primary: '#F97316',
       border: isDark ? '#2a2a2a' : '#e5e7eb',
       muted: isDark ? '#9ca3af' : '#6b7280',
       white: '#ffffff'
