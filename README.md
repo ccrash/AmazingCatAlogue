@@ -67,3 +67,11 @@ yarn coverage
 - **Per-screen error boundaries** — each tab screen catches its own errors and shows a "Try again" prompt, so a crash in one tab never affects the others.
 - **Search result ordering** — rapid queries are sequenced so a slow in-flight response can never overwrite the results of a newer one.
 - **Image height capping** — portrait or extreme-aspect-ratio images are capped at 2× the screen width to prevent oversized cards.
+
+
+## License
+
+This project is licensed under a custom non-commercial license.
+
+❗ Commercial use is prohibited  
+❗ Use in AI/ML systems is strictly prohibited without permission
