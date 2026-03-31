@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react'
 import { Text, View, FlatList, StyleSheet } from 'react-native'
-import MemoPhotoItem from '@/components/photoItem'
+import MemoPhotoItem from '@components/photoItem'
 import { usePhotosStore, selectLikedPhotos } from '@store/usePhotosStore'
 import { useTheme } from '@theme/ThemeProvider'
 import type { AppTheme } from '@theme/tokens'

@@ -176,6 +176,7 @@ describe('loadFavourites', () => {
   })
 
   it('silently ignores errors', async () => {
+    jest.spyOn(console, 'warn').mockImplementation(() => {})
     ;(mockFetchFavourites as jest.Mock).mockRejectedValue(new Error('network'))
     await expect(usePhotosStore.getState().loadFavourites()).resolves.toBeUndefined()
   })
@@ -256,6 +257,7 @@ describe('toggleLike', () => {
   })
 
   it('swallows prefetch errors silently', async () => {
+    jest.spyOn(console, 'warn').mockImplementation(() => {})
     const { Image } = require('react-native')
     ;(mockFetchPhotos as jest.Mock).mockResolvedValue([makePhoto('p1')])
     ;(mockAddFavourite as jest.Mock).mockResolvedValue({ id: 8, message: 'SUCCESS' })
